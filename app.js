@@ -10,8 +10,6 @@ var multer = require('multer');
 var fs = require('fs');
 let mongoose = require("mongoose");
 var expressLayouts = require('express-ejs-layouts');
-var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
 var app = express();
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
@@ -34,8 +32,12 @@ mongoose.connection.once('open', () => {
 }).on('error', error => {
   console.log("Oops! database connection error:" + error);
 });
-app.use('/', indexRouter);
-app.use('/users', usersRouter);
+const apipaths = [
+  { pathUrl: '/login', routeFile: 'login'}
+];
+apipaths.forEach((path) => {
+	app.use(path.pathUrl, require('./routes/' + path.routeFile));
+});
 app.use(function(req, res, next) {
   next(createError(404));
 });
