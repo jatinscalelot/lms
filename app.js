@@ -32,6 +32,9 @@ mongoose.connection.once('open', () => {
 }).on('error', error => {
   console.log("Oops! database connection error:" + error);
 });
+app.get('/', async (req, res) => {
+  res.render('index', { title: 'LMS', layout: false });
+});
 const apipaths = [
   { pathUrl: '/login', routeFile: 'login'},
   { pathUrl: '/agent', routeFile: 'agent'},
