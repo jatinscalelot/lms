@@ -33,7 +33,12 @@ mongoose.connection.once('open', () => {
   console.log("Oops! database connection error:" + error);
 });
 const apipaths = [
-  { pathUrl: '/login', routeFile: 'login'}
+  { pathUrl: '/login', routeFile: 'login'},
+  { pathUrl: '/agent', routeFile: 'agent'},
+  { pathUrl: '/leadmanager', routeFile: 'leadmanager'},
+  { pathUrl: '/leads', routeFile: 'leads'},
+  { pathUrl: '/sites', routeFile: 'sites'},
+  { pathUrl: '/users', routeFile: 'users'},
 ];
 apipaths.forEach((path) => {
 	app.use(path.pathUrl, require('./routes/' + path.routeFile));
