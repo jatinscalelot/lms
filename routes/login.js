@@ -17,7 +17,8 @@ router.post('/', async (req, res) => {
             if(decPassword == password){
                 let accessToken = await helper.generateAccessToken({ userid : userData._id.toString() });
                 await primary.model(constants.MODELS.users, userModel).findByIdAndUpdate(userData._id, {last_login_at : Date.now()});
-                return responseManager.onSuccess('User login successfully!', {token : accessToken}, res);
+                let finaluserData = await primary.model(constants.MODELS.users, userModel).findById(userData._id).select('-password').lean();
+                return responseManager.onSuccess('User login successfully!', {token : accessToken, userprofile : finaluserData}, res);
             }else{
                 return responseManager.badrequest({message : 'Invalid password, please try again'}, res);
             }
