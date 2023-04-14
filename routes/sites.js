@@ -16,7 +16,38 @@ router.post('/', helper.authenticateToken, async (req, res) => {
         let primary = mongoConnection.useDb(constants.DEFAULT_DB);
         let userData = await primary.model(constants.MODELS.users, userModel).findById(req.token.userid).select('-password').lean();
         if(userData && userData.status == true && userData.role == 'admin'){
-            
+            await primary.model(constants.MODELS.users, userModel).paginate({
+                $or: [
+                    { site_name: { '$regex': new RegExp(search, "i") } },
+                    { site_description: { '$regex': new RegExp(search, "i") } },
+                    { site_location: { '$regex': new RegExp(search, "i") } }
+                ]
+            }, {
+                page,
+                limit: parseInt(limit),
+                sort: { _id: -1 },
+                lean: true
+            }).then((sites) => {
+                return responseManager.onSuccess('Site list..', sites, res);
+            }).catch((error) => {
+                return responseManager.onError(error, res);
+            });
+        }else{
+            return responseManager.unauthorisedRequest(res);
+        }
+    }else{
+        return responseManager.unauthorisedRequest(res);
+    }
+});
+router.get('/', helper.authenticateToken, async (req, res) => {
+    res.setHeader('Access-Control-Allow-Headers','Content-Type,Authorization');
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    if (req.token.userid && mongoose.Types.ObjectId.isValid(req.token.userid)) {
+        let primary = mongoConnection.useDb(constants.DEFAULT_DB);
+        let userData = await primary.model(constants.MODELS.users, userModel).findById(req.token.userid).select('-password').lean();
+        if(userData && userData.status == true && userData.role == 'admin'){
+            let sites = await primary.model(constants.MODELS.users, userModel).find({}).select('site_name').sort({'site_name' : 1}).lean();
+            return responseManager.onSuccess('Site list..', sites, res);
         }else{
             return responseManager.unauthorisedRequest(res);
         }
@@ -77,7 +108,9 @@ router.post('/getone', helper.authenticateToken, async (req, res) => {
         let primary = mongoConnection.useDb(constants.DEFAULT_DB);
         let userData = await primary.model(constants.MODELS.users, userModel).findById(req.token.userid).select('-password').lean();
         if(userData && userData.status == true && userData.role == 'admin'){
-            console.log('req.body', req.body);
+            const { siteid } = req.body;
+            let createdSite = await primary.model(constants.MODELS.sites, siteModel).findById(siteid).lean();
+            return responseManager.onSuccess('Site data...', createdSite, res);
         }else{
             return responseManager.unauthorisedRequest(res);
         }
