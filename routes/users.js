@@ -10,7 +10,7 @@ router.post('/save', helper.authenticateToken, async (req, res) => {
     res.setHeader('Access-Control-Allow-Headers','Content-Type,Authorization');
     res.setHeader('Access-Control-Allow-Origin', '*');
     if (req.token.userid && mongoose.Types.ObjectId.isValid(req.token.userid)) {
-        const { userid, name, email, role, agentid, mobile, country_code, password, status } = req.body;
+        const { userid, name, email, role, agentid, siteid, mobile, country_code, password, status } = req.body;
         let primary = mongoConnection.useDb(constants.DEFAULT_DB);
         let userData = await primary.model(constants.MODELS.users, userModel).findById(req.token.userid).select('-password').lean();
         if(userData && userData.status == true && (userData.role == 'admin' || userData.role == 'agent')){
@@ -51,6 +51,7 @@ router.post('/save', helper.authenticateToken, async (req, res) => {
                         role : role,
                         status : (status == true) ? true : false,
                         password : await helper.passwordEncryptor(password),
+                        siteid : new mongoose.Types.ObjectId(siteid),
                         createdBy : new mongoose.Types.ObjectId(req.token.userid),
                         updatedBy : new mongoose.Types.ObjectId(req.token.userid)
                     };
@@ -68,6 +69,7 @@ router.post('/save', helper.authenticateToken, async (req, res) => {
                         role : role,
                         status : (status == true) ? true : false,
                         agentid : mongoose.Types.ObjectId(req.token.userid),
+                        siteid : new mongoose.Types.ObjectId(siteid),
                         password : await helper.passwordEncryptor(password),
                         createdBy : new mongoose.Types.ObjectId(req.token.userid),
                         updatedBy : new mongoose.Types.ObjectId(req.token.userid)
@@ -94,7 +96,7 @@ router.post('/getone', helper.authenticateToken, async (req, res) => {
         let userData = await primary.model(constants.MODELS.users, userModel).findById(req.token.userid).select('-password').lean();
         if(userData && userData.status == true && (userData.role == 'admin' || userData.role == 'agent')){
             if(userid && userid != '' && mongoose.Types.ObjectId.isValid(userid)){
-                let existinguser = await primary.model(constants.MODELS.users, userModel).findById(userid).populate({path: 'agentid', model: primary.model(constants.MODELS.users, userModel), select: "name email mobile country_code"}).select('-password').lean();
+                let existinguser = await primary.model(constants.MODELS.users, userModel).findById(userid).populate([{path: 'agentid', model: primary.model(constants.MODELS.users, userModel), select: "name email mobile country_code"}, {path: 'siteid', model: primary.model(constants.MODELS.sites, siteModel), select: "name"}]).select('-password').lean();
                 if(userData.role == 'admin'){
                     return responseManager.onSuccess('User data..', existinguser, res);
                 } else if(userData.role == 'agent' && existinguser.role == 'leadmanager' && existinguser.agentid._id.toString() == req.token.userid.toString()){

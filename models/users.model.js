@@ -29,6 +29,10 @@ let schema = new mongoose.Schema({
         type: Boolean,
 		default: true
     },
+	siteid : {
+		type: mongoose.Types.ObjectId,
+		default: null
+	},
 	agentid : {
 		type: mongoose.Types.ObjectId,
 		default: null
