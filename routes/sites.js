@@ -16,7 +16,7 @@ router.post('/', helper.authenticateToken, async (req, res) => {
         let primary = mongoConnection.useDb(constants.DEFAULT_DB);
         let userData = await primary.model(constants.MODELS.users, userModel).findById(req.token.userid).select('-password').lean();
         if(userData && userData.status == true && userData.role == 'admin'){
-            await primary.model(constants.MODELS.users, userModel).paginate({
+            await primary.model(constants.MODELS.sites, siteModel).paginate({
                 $or: [
                     { site_name: { '$regex': new RegExp(search, "i") } },
                     { site_description: { '$regex': new RegExp(search, "i") } },
