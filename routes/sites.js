@@ -44,4 +44,7 @@ router.post('/update', helper.authenticateToken, async (req, res) => {
 router.post('/remove', helper.authenticateToken, async (req, res) => {
     console.log('req.body', req.body);
 });
+router.post('/getone', helper.authenticateToken, async (req, res) => {
+
+});
 module.exports = router;

@@ -12,10 +12,29 @@ router.post('/', helper.authenticateToken, async (req, res) => {
     res.setHeader('Access-Control-Allow-Headers','Content-Type,Authorization');
     res.setHeader('Access-Control-Allow-Origin', '*');
     if (req.token.userid && mongoose.Types.ObjectId.isValid(req.token.userid)) {
-        const { status } = req.body;
         let primary = mongoConnection.useDb(constants.DEFAULT_DB);
         let userData = await primary.model(constants.MODELS.users, userModel).findById(req.token.userid).select('-password').lean();
-        if(userData && userData.status == true && userData.role == 'admin'){
+        if(userData && userData.status == true && userData.role == 'admin' || userData.role == 'leadmanager'){
+            const { page, limit, search } = req.body;
+            await primary.model(constants.MODELS.users, userModel).paginate({
+                $or: [
+                    { name: { '$regex': new RegExp(search, "i") } },
+                    { email: { '$regex': new RegExp(search, "i") } },
+                    { mobile: { '$regex': new RegExp(search, "i") } }
+                ],
+                role : 'leadmanager'
+            }, {
+                page,
+                limit: parseInt(limit),
+                sort: { _id: -1 },
+                populate: { path: 'agentid', model: primary.model(constants.MODELS.users, userModel), select: "name email mobile country_code" },
+                select: 'name role email mobile country_code status createdAt updatedAt last_login_at agentid',
+                lean: true
+            }).then((leadmanagers) => {
+                return responseManager.onSuccess('Lead Manager list..', leadmanagers, res);
+            }).catch((error) => {
+                return responseManager.onError(error, res);
+            });
         }else{
             return responseManager.unauthorisedRequest(res);
         }

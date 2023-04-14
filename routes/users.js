@@ -85,4 +85,31 @@ router.post('/save', helper.authenticateToken, async (req, res) => {
         return responseManager.unauthorisedRequest(res);
     }
 });
+router.post('/getone', helper.authenticateToken, async (req, res) => {
+    res.setHeader('Access-Control-Allow-Headers','Content-Type,Authorization');
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    if (req.token.userid && mongoose.Types.ObjectId.isValid(req.token.userid)) {
+        const { userid } = req.body;
+        let primary = mongoConnection.useDb(constants.DEFAULT_DB);
+        let userData = await primary.model(constants.MODELS.users, userModel).findById(req.token.userid).select('-password').lean();
+        if(userData && userData.status == true && (userData.role == 'admin' || userData.role == 'agent')){
+            if(userid && userid != '' && mongoose.Types.ObjectId.isValid(userid)){
+                let existinguser = await primary.model(constants.MODELS.users, userModel).findById(userid).populate({path: 'agentid', model: primary.model(constants.MODELS.users, userModel), select: "name email mobile country_code"}).select('-password').lean();
+                if(userData.role == 'admin'){
+                    return responseManager.onSuccess('User data..', existinguser, res);
+                } else if(userData.role == 'agent' && existinguser.role == 'leadmanager' && existinguser.agentid._id.toString() == req.token.userid.toString()){
+                    return responseManager.onSuccess('User data..', existinguser, res);
+                } else {
+                    return responseManager.unauthorisedRequest(res);
+                }
+            }else{
+                return responseManager.unauthorisedRequest(res);
+            }
+        }else{
+            return responseManager.unauthorisedRequest(res);
+        }
+    }else{
+        return responseManager.unauthorisedRequest(res);
+    }
+});
 module.exports = router;
