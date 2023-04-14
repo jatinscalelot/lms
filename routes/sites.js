@@ -31,7 +31,8 @@ router.post('/create', helper.authenticateToken, async (req, res) => {
         let primary = mongoConnection.useDb(constants.DEFAULT_DB);
         let userData = await primary.model(constants.MODELS.users, userModel).findById(req.token.userid).select('-password').lean();
         if(userData && userData.status == true && userData.role == 'admin'){
-            console.log('req.body', req.body);
+            let createdSite = await primary.model(constants.MODELS.sites, siteModel).create(req.body);
+            return responseManager.onSuccess('Site data saved successfully...', createdSite, res);
         }else{
             return responseManager.unauthorisedRequest(res);
         }
