@@ -96,7 +96,7 @@ router.post('/getone', helper.authenticateToken, async (req, res) => {
         let userData = await primary.model(constants.MODELS.users, userModel).findById(req.token.userid).select('-password').lean();
         if(userData && userData.status == true && (userData.role == 'admin' || userData.role == 'agent')){
             if(userid && userid != '' && mongoose.Types.ObjectId.isValid(userid)){
-                let existinguser = await primary.model(constants.MODELS.users, userModel).findById(userid).populate([{path: 'agentid', model: primary.model(constants.MODELS.users, userModel), select: "name email mobile country_code"}, {path: 'siteid', model: primary.model(constants.MODELS.sites, siteModel), select: "name"}]).select('-password').lean();
+                let existinguser = await primary.model(constants.MODELS.users, userModel).findById(userid).populate([{path: 'agentid', model: primary.model(constants.MODELS.users, userModel), select: "name email mobile country_code"}, {path: 'siteid', model: primary.model(constants.MODELS.sites, siteModel), select: "site_name"}]).select('-password').lean();
                 if(userData.role == 'admin'){
                     return responseManager.onSuccess('User data..', existinguser, res);
                 } else if(userData.role == 'agent' && existinguser.role == 'leadmanager' && existinguser.agentid._id.toString() == req.token.userid.toString()){

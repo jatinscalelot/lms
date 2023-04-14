@@ -28,7 +28,7 @@ router.post('/', helper.authenticateToken, async (req, res) => {
                     page,
                     limit: parseInt(limit),
                     sort: { _id: -1 },
-                    populate: [{ path: 'agentid', model: primary.model(constants.MODELS.users, userModel), select: "name email mobile country_code" },{path: 'siteid', model: primary.model(constants.MODELS.sites, siteModel), select: "name"}],
+                    populate: [{ path: 'agentid', model: primary.model(constants.MODELS.users, userModel), select: "name email mobile country_code" },{path: 'siteid', model: primary.model(constants.MODELS.sites, siteModel), select: "site_name"}],
                     select: 'name role email mobile country_code status createdAt updatedAt last_login_at agentid',
                     lean: true
                 }).then((leadmanagers) => {
