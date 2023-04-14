@@ -78,7 +78,9 @@ router.post('/update', helper.authenticateToken, async (req, res) => {
         let primary = mongoConnection.useDb(constants.DEFAULT_DB);
         let userData = await primary.model(constants.MODELS.users, userModel).findById(req.token.userid).select('-password').lean();
         if(userData && userData.status == true && userData.role == 'admin'){
-            console.log('req.body', req.body);
+            const { siteid, site } = req.body;
+            await primary.model(constants.MODELS.sites, siteModel).findByIdAndUpdate(siteid, site);
+            return responseManager.onSuccess('Site data saved successfully...', 1, res);
         }else{
             return responseManager.unauthorisedRequest(res);
         }
@@ -93,7 +95,9 @@ router.post('/remove', helper.authenticateToken, async (req, res) => {
         let primary = mongoConnection.useDb(constants.DEFAULT_DB);
         let userData = await primary.model(constants.MODELS.users, userModel).findById(req.token.userid).select('-password').lean();
         if(userData && userData.status == true && userData.role == 'admin'){
-            console.log('req.body', req.body);
+            const { siteid } = req.body;
+            await primary.model(constants.MODELS.sites, siteModel).findByIdAndRemove(siteid);
+            return responseManager.onSuccess('Site data removed successfully...', 1, res);
         }else{
             return responseManager.unauthorisedRequest(res);
         }
