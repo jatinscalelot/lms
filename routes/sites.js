@@ -46,7 +46,7 @@ router.get('/', helper.authenticateToken, async (req, res) => {
         let primary = mongoConnection.useDb(constants.DEFAULT_DB);
         let userData = await primary.model(constants.MODELS.users, userModel).findById(req.token.userid).select('-password').lean();
         if(userData && userData.status == true && userData.role == 'admin'){
-            let sites = await primary.model(constants.MODELS.users, userModel).find({}).select('site_name').sort({'site_name' : 1}).lean();
+            let sites = await primary.model(constants.MODELS.sites, siteModel).find({}).select('site_name').sort({'site_name' : 1}).lean();
             return responseManager.onSuccess('Site list..', sites, res);
         }else{
             return responseManager.unauthorisedRequest(res);
