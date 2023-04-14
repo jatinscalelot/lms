@@ -23,7 +23,7 @@ router.post('/save', helper.authenticateToken, async (req, res) => {
                         mobile : mobile,
                         country_code : country_code,
                         status : (status == true) ? true : false,
-                        updatedBy : mongoose.Types.ObjectId(req.token.userid)
+                        updatedBy : new mongoose.Types.ObjectId(req.token.userid)
                     };
                     await primary.model(constants.MODELS.users, userModel).findByIdAndUpdate(userid, obj);
                     return responseManager.onSuccess('User data saved successfully...', 1, res);
@@ -34,7 +34,7 @@ router.post('/save', helper.authenticateToken, async (req, res) => {
                         mobile : mobile,
                         country_code : country_code,
                         status : (status == true) ? true : false,
-                        updatedBy : mongoose.Types.ObjectId(req.token.userid)
+                        updatedBy : new mongoose.Types.ObjectId(req.token.userid)
                     };
                     await primary.model(constants.MODELS.users, userModel).findByIdAndUpdate(userid, obj);
                     return responseManager.onSuccess('User data saved successfully...', 1, res);
@@ -51,11 +51,11 @@ router.post('/save', helper.authenticateToken, async (req, res) => {
                         role : role,
                         status : (status == true) ? true : false,
                         password : await helper.passwordEncryptor(password),
-                        createdBy : mongoose.Types.ObjectId(req.token.userid),
-                        updatedBy : mongoose.Types.ObjectId(req.token.userid)
+                        createdBy : new mongoose.Types.ObjectId(req.token.userid),
+                        updatedBy : new mongoose.Types.ObjectId(req.token.userid)
                     };
                     if(agentid && agentid != '' && mongoose.Types.ObjectId.isValid(agentid) && obj.role == 'leadmanager'){
-                      obj.agentid = mongoose.Types.ObjectId(agentid);
+                      obj.agentid = new mongoose.Types.ObjectId(agentid);
                     }
                     let insertedObj = await primary.model(constants.MODELS.users, userModel).create(obj);
                     return responseManager.onSuccess('User data saved successfully...', insertedObj, res);
@@ -69,8 +69,8 @@ router.post('/save', helper.authenticateToken, async (req, res) => {
                         status : (status == true) ? true : false,
                         agentid : mongoose.Types.ObjectId(req.token.userid),
                         password : await helper.passwordEncryptor(password),
-                        createdBy : mongoose.Types.ObjectId(req.token.userid),
-                        updatedBy : mongoose.Types.ObjectId(req.token.userid)
+                        createdBy : new mongoose.Types.ObjectId(req.token.userid),
+                        updatedBy : new mongoose.Types.ObjectId(req.token.userid)
                     };
                     let insertedObj = await primary.model(constants.MODELS.users, userModel).create(obj);
                     return responseManager.onSuccess('User data saved successfully...', insertedObj, res);
